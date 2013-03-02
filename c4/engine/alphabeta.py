@@ -1,35 +1,6 @@
-import random
-
-from c4.evaluate import INF, Evaluator
+from c4.evaluate import INF
 from c4.engine.negamax import NegamaxEngine
-
-
-class MoveOrder(object):
-    def __init__(self, name):
-        if name == 'seq':
-            self.order = self._order_seq
-        elif name == 'random':
-            self.order = self._order_random
-        elif name == 'eval':
-            self.order = self._order_eval
-        else:
-            raise NotImplemented()
-
-    def _order_seq(self, board, moves):
-        return moves
-
-    def _order_random(self, board, moves):
-        random.shuffle(moves)
-        return moves
-
-    def _order_eval(self, board, moves):
-        if not hasattr(self, 'evaluate'):
-            self.evaluate = Evaluator().evaluate
-
-        ordered_moves = [(-self.evaluate(board.move(m)), m) for m in moves]
-        ordered_moves.sort(reverse=True)
-        for _, m in ordered_moves:
-            yield m
+from c4.moveorder import MoveOrder
         
 
 class AlphaBetaEngine(NegamaxEngine):

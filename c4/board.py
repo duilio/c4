@@ -2,10 +2,13 @@ from itertools import chain
 
 import numpy as np
 
+from c4.tables import rev_segments, all_segments
+
 
 PLAYER1 = 1
 PLAYER2 = 2
 DRAW = 0
+COMPUTE = -1
 
 
 class WrongMoveError(Exception):
@@ -13,12 +16,15 @@ class WrongMoveError(Exception):
 
 
 class Board(object):
-    def __init__(self, pos=None, stm=PLAYER1, cols=8, rows=7):
+    def __init__(self, pos=None, stm=PLAYER1, end=COMPUTE, cols=8, rows=7):
         if pos is None:
             pos = np.zeros((cols, rows), dtype=int)
         self._pos = pos
         self._stm = stm
-        self._end = self._check_end(pos)
+        if end == COMPUTE:
+            self._end = self._check_end(pos)
+        else:
+            self._end = end
         
     @property
     def end(self):
@@ -42,6 +48,17 @@ class Board(object):
             return DRAW
 
     @classmethod
+    def _check_end_around(cls, pos, r, c, side):
+        for seg in cls.segments_around(pos, r, c):
+            if (seg == side).all():
+                return side
+
+        if (pos == 0).any():
+            return None
+        else:
+            return DRAW
+        
+    @classmethod
     def linear_segments(cls, line):
         for x in range(len(line) - 3):
             yield line[x:x+4]
@@ -52,24 +69,20 @@ class Board(object):
             for x in cls.segments(pos._pos):
                 yield x
         else:
-            # vertical segments
-            for col in pos:
-                for x in cls.linear_segments(col):
-                    yield x
+            pos = pos.flatten()
+            for x in pos[all_segments]:
+                yield x
 
-            # horizontal segments
-            for row in pos.transpose():
-                for x in cls.linear_segments(row):
-                    yield x
-
-            # diagonal segments
-            invpos = pos[:, ::-1]
-            for d in range(-(len(pos) - 4), (len(pos) - 4)):
-                diag1 = pos.diagonal(d)
-                diag2 = invpos.diagonal(d)
-                for x in chain(cls.linear_segments(diag1),
-                               cls.linear_segments(diag2)):
-                    yield x
+    @classmethod
+    def segments_around(cls, pos, r, c):
+        if isinstance(pos, Board):
+            for x in cls.segments_around(pos._pos, r, c):
+                yield x
+        else:
+            idx = c * pos.shape[1] + r
+            pos = pos.flatten()
+            for seg in rev_segments[idx]:
+                yield pos[seg]
 
     def __str__(self):
         disc = {
@@ -105,8 +118,15 @@ class Board(object):
         if pos[m][r] != 0:
             raise WrongMoveError('Full Column')
         pos[m][r] = self._stm
+        end = self._check_end_around(pos, r, m, self._stm)
         stm = PLAYER1 if self._stm != PLAYER1 else PLAYER2
-        return Board(pos, stm)
+        return Board(pos, stm, end)
+
+    def freerow(self, m):
+        r = self._pos[m].argmin()
+        if self._pos[m][r] != 0:
+            return None
+        return r
 
     def moves(self):
         return np.flatnonzero(self._pos[:, -1] == 0)

@@ -10,8 +10,8 @@ class Evaluator(object):
         self._weights = np.asarray(weights)
 
     def evaluate(self, board):
-        scores = {PLAYER1: [0]*5,
-                  PLAYER2: [0]*5}
+        scores = {PLAYER1: np.zeros(5, dtype=int),
+                  PLAYER2: np.zeros(5, dtype=int)}
 
         if board.end is not None:
             if board.end == DRAW:
@@ -20,18 +20,25 @@ class Evaluator(object):
                 return INF
             else:
                 return -INF
+
+        segments = Board.segments(board)
                 
-        for s in Board.segments(board):
+        for s in segments:
             z = (s == 0).sum()
-            for p in (PLAYER1, PLAYER2):
-                c = (s == p).sum()
-                if c + z == 4:
-                    scores[p][c] += 1
+            if z == 4:
+                continue
+            
+            c1 = (s == PLAYER1).sum()
+            c2 = 4 - (z+c1)
+            if c2 == 0:
+                scores[PLAYER1][c1] += 1
+            elif c1 == 0:
+                scores[PLAYER2][c2] += 1
 
-        scores[PLAYER1] = (self._weights * scores[PLAYER1]).sum()
-        scores[PLAYER2] = (self._weights * scores[PLAYER2]).sum()
+        s1 = (self._weights * scores[PLAYER1]).sum()
+        s2 = (self._weights * scores[PLAYER2]).sum()
 
-        score = scores[PLAYER1] - scores[PLAYER2]
+        score = s1 - s2
         if board.stm == PLAYER1:
             return score
         else:
