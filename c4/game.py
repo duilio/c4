@@ -17,8 +17,8 @@ class GameHandler(object):
         
         while b.end is None:
             if self.verbose:
-                print b
-                print 'Player %s is thinking...' % {PLAYER1: 'X', PLAYER2: 'O'}[b.stm]
+                print(b)
+                print('Player %s is thinking...' % {PLAYER1: 'X', PLAYER2: 'O'}[b.stm])
             player = players[b.stm]
             move = player.choose(b)
             b = b.move(move)

@@ -1,6 +1,36 @@
-from c4.evaluate import INF
+import random
+
+from c4.evaluate import INF, Evaluator
 from c4.engine.negamax import NegamaxEngine
 
+
+class MoveOrder(object):
+    def __init__(self, name):
+        if name == 'seq':
+            self.order = self._order_seq
+        elif name == 'random':
+            self.order = self._order_random
+        elif name == 'eval':
+            self.order = self._order_eval
+        else:
+            raise NotImplemented()
+
+    def _order_seq(self, board, moves):
+        return moves
+
+    def _order_random(self, board, moves):
+        random.shuffle(moves)
+        return moves
+
+    def _order_eval(self, board, moves):
+        if not hasattr(self, 'evaluate'):
+            self.evaluate = Evaluator().evaluate
+
+        ordered_moves = [(-self.evaluate(board.move(m)), m) for m in moves]
+        ordered_moves.sort(reverse=True)
+        for _, m in ordered_moves:
+            yield m
+        
 
 class AlphaBetaEngine(NegamaxEngine):
     FORMAT_STAT = (
@@ -8,6 +38,10 @@ class AlphaBetaEngine(NegamaxEngine):
         'nps: {nps}, nodes: {nodes}, betacuts: {betacuts}\n' +
         'leaves: {leaves}, draws: {draws}, mates: {mates}'
         )
+
+    def __init__(self, maxdepth, ordering='seq'):
+        super(AlphaBetaEngine, self).__init__(maxdepth)
+        self.moveorder = MoveOrder(ordering).order
 
     def initcnt(self):
         super(AlphaBetaEngine, self).initcnt()
@@ -25,7 +59,7 @@ class AlphaBetaEngine(NegamaxEngine):
 
         bestmove = []
         bestscore = alpha
-        for m in board.moves():
+        for m in self.moveorder(board, board.moves()):
             nextmoves, score = self.search(board.move(m), depth-1, ply+1,
                                            -beta, -bestscore)
             score = -score

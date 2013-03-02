@@ -1,17 +1,53 @@
 #!/usr/bin/env python
 import sys
+import argparse
 
-from c4.board import DRAW
-from c4.engine import NegamaxEngine, AlphaBetaEngine
+from c4.board import Board, DRAW
+from c4.engine import GreedyEngine, NegamaxEngine, AlphaBetaEngine
 from c4.game import GameHandler
 from c4.arena import arena
 
 
+engine_map = {
+    'greedy': GreedyEngine,
+    'negamax': NegamaxEngine,
+    'alphabeta': AlphaBetaEngine,
+    }
+
+
 def main():
-    engines = [AlphaBetaEngine(2),
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(title='Commands', description='c4 builin commands')
+
+    arena_parser = subparsers.add_parser('arena', help='Run arena')
+    arena_parser.set_defaults(cmd=run_arena)
+
+    bm_parser = subparsers.add_parser('bm', help='Select the bestmove')
+    bm_parser.set_defaults(cmd=run_bm)
+    bm_parser.add_argument('engine', metavar='ENGINE',
+                           help='Engine to use. Format: engine_name:par1:par2:...')
+
+    args = parser.parse_args()
+    args.cmd(args)
+
+
+def run_shell(args):
+    pass
+
+
+def run_arena(args):
+    engines = [GreedyEngine(),
+               AlphaBetaEngine(2),
                NegamaxEngine(2)]
     arena(engines)
-        
+
+
+def run_bm(args):
+    engine_name, *engine_args = args.engine.split(':')
+    engine_class = engine_map[engine_name]
+    engine = engine_class(*engine_args)
+    engine.choose(Board())
+    
     
 if __name__ == '__main__':
     sys.exit(main())

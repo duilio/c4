@@ -21,7 +21,7 @@ class GreedyEngine(Engine):
                 bestmove = m
                 bestscore = score
 
-        print 'Bestscore:', bestscore
+        print('Bestscore:', bestscore)
         return bestmove
 
     def __str__(self):

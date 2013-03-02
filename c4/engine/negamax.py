@@ -14,7 +14,7 @@ class NegamaxEngine(GreedyEngine):
 
     def __init__(self, maxdepth=4):
         super(NegamaxEngine, self).__init__()
-        self._maxdepth = maxdepth
+        self._maxdepth = int(maxdepth)
 
     def choose(self, board):
         self.initcnt()
@@ -50,7 +50,7 @@ class NegamaxEngine(GreedyEngine):
         ctx['score'] = score
         ctx['time'] = t
         
-        print self.FORMAT_STAT.format(**ctx)
+        print(self.FORMAT_STAT.format(**ctx))
     
     def search(self, board, depth, ply=1):
         self.inc('nodes')

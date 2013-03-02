@@ -1,6 +1,6 @@
 import numpy as np
 
-from c4.board import Board, PLAYER1, PLAYER2
+from c4.board import Board, PLAYER1, PLAYER2, DRAW
 
 INF = 1000
 
@@ -13,6 +13,14 @@ class Evaluator(object):
         scores = {PLAYER1: [0]*5,
                   PLAYER2: [0]*5}
 
+        if board.end is not None:
+            if board.end == DRAW:
+                return 0
+            elif board.end == board.stm:
+                return INF
+            else:
+                return -INF
+                
         for s in Board.segments(board):
             z = (s == 0).sum()
             for p in (PLAYER1, PLAYER2):

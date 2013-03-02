@@ -49,6 +49,6 @@ def arena(engines):
 
     rank = sorted(stats.iteritems(), key=lambda x: x[1].score, reverse=True)
     formats = '%-3s  | %-16s | %5s | %4s | %4s | %4s'
-    print formats % ('N.', 'Name', 'Score', 'Win', 'WinX', 'WinO')
+    print(formats % ('N.', 'Name', 'Score', 'Win', 'WinX', 'WinO'))
     for i, (name, stat) in enumerate(rank, 1):
-        print formats % (i, name, stat.score, stat.win, stat.win_X, stat.win_O)
+        print(formats % (i, name, stat.score, stat.win, stat.win_X, stat.win_O))
