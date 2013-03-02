@@ -130,3 +130,28 @@ class Board(object):
 
     def moves(self):
         return np.flatnonzero(self._pos[:, -1] == 0)
+
+    def hashkey(self):
+        """Generates an hashkey
+
+        Returns a tuple (key, flip)
+        flip is True if it returned the key of the symmetric Board.
+
+        """
+        k1 = 0
+        k2 = 0
+
+        for x in self._pos.flat:
+            k1 *= 3
+            k1 += int(x)
+            assert k1 >= 0
+
+        for x in self._pos[::-1].flat:
+            k2 *= 3
+            k2 += int(x)
+            assert k2 >= 0
+
+        if k2 < k1:
+            return k2, True
+        else:
+            return k1, False

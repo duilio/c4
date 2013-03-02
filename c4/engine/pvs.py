@@ -1,5 +1,6 @@
 from c4.evaluate import INF
 from c4.engine.alphabeta import AlphaBetaEngine
+from c4.engine.cached import CachedEngineMixin
 
 
 class PVSEngine(AlphaBetaEngine):
@@ -45,3 +46,18 @@ class PVSEngine(AlphaBetaEngine):
 
     def __str__(self):
         return 'PVS(%s)' % self._maxdepth
+
+
+class PVSCachedEngine(CachedEngineMixin, PVSEngine):
+    FORMAT_STAT = (
+        'score: {score} [time: {time}s, pv: {pv}]\n' +
+        'nps: {nps}, nodes: {nodes}, betacuts: {betacuts}\n' +
+        'hits: {hits}, leaves: {leaves}, draws: {draws}, mates: {mates}'
+        )
+
+    def initcnt(self):
+        super(PVSCachedEngine, self).initcnt()
+        self._counters['hits'] = 0
+
+    def __str__(self):
+        return 'PVSCache(%s)' % self._maxdepth
