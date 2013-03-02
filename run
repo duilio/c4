@@ -3,7 +3,8 @@ import sys
 import argparse
 
 from c4.board import Board, DRAW
-from c4.engine import GreedyEngine, NegamaxEngine, AlphaBetaEngine, PVSEngine, PVSCachedEngine
+from c4.engine import GreedyEngine, NegamaxEngine, AlphaBetaEngine, \
+    PVSEngine, PVSCachedEngine, PVSDeepEngine
 from c4.game import GameHandler
 from c4.arena import arena
 
@@ -14,6 +15,7 @@ engine_map = {
     'alphabeta': AlphaBetaEngine,
     'pvs': PVSEngine,
     'pvscached': PVSCachedEngine,
+    'pvsdeep': PVSDeepEngine,
     }
 
 

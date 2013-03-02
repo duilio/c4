@@ -1,10 +1,11 @@
 from c4.evaluate import INF
 from c4.engine.alphabeta import AlphaBetaEngine
 from c4.engine.cached import CachedEngineMixin
+from c4.engine.deepening import IterativeDeepeningEngineMixin
 
 
 class PVSEngine(AlphaBetaEngine):
-    def search(self, board, depth, ply=1, alpha=-INF, beta=INF):
+    def search(self, board, depth, ply=1, alpha=-INF, beta=INF, hint=None):
         self.inc('nodes')
 
         if board.end is not None:
@@ -16,7 +17,7 @@ class PVSEngine(AlphaBetaEngine):
 
         bestmove = []
         bestscore = alpha
-        for i, m in enumerate(self.moveorder(board, board.moves())):
+        for i, m in enumerate(self.moveorder(board, board.moves(), hint)):
             if i == 0 or depth == 1 or (beta-alpha) == 1:
                 nextmoves, score = self.search(board.move(m), depth-1, ply+1,
                                                -beta, -bestscore)
@@ -61,3 +62,18 @@ class PVSCachedEngine(CachedEngineMixin, PVSEngine):
 
     def __str__(self):
         return 'PVSCache(%s)' % self._maxdepth
+
+
+class PVSDeepEngine(CachedEngineMixin, IterativeDeepeningEngineMixin, PVSEngine):
+    FORMAT_STAT = (
+        '[depth: {depth}] score: {score} [time: {time}s, pv: {pv}]\n' +
+        'nps: {nps}, nodes: {nodes}, betacuts: {betacuts}\n' +
+        'hits: {hits}, leaves: {leaves}, draws: {draws}, mates: {mates}'
+        )
+
+    def initcnt(self):
+        super(PVSDeepEngine, self).initcnt()
+        self._counters['hits'] = 0
+
+    def __str__(self):
+        return 'PVSDeep(%s)' % self._maxdepth

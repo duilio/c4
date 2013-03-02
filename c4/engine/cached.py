@@ -18,6 +18,7 @@ class CachedEngineMixin(object):
             return move, score
         else:
             move, score = super(CachedEngineMixin, self).search(board, depth, ply,
-                                                                alpha, beta)
+                                                                alpha, beta,
+                                                                hint=move)
             self._cache.put(board, move, depth, ply, score, alpha, beta)
             return move, score

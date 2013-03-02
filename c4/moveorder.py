@@ -7,13 +7,13 @@ from c4.evaluate import Evaluator, INF
 class MoveOrder(object):
     def __init__(self, name):
         if name == 'seq':
-            self.order = self._order_seq
+            self._order = self._order_seq
         elif name == 'random':
-            self.order = self._order_random
+            self._order = self._order_random
         elif name == 'eval':
-            self.order = self._order_eval
+            self._order = self._order_eval
         elif name == 'diff':
-            self.order = self._order_diff
+            self._order = self._order_diff
         else:
             raise NotImplemented()
 
@@ -67,3 +67,12 @@ class MoveOrder(object):
         ordered_moves.sort(reverse=True)
         for _, m in ordered_moves:
             yield m
+
+    def order(self, board, moves, hint=None):
+        if hint is not None:
+            yield hint
+        
+        for x in self._order(board, moves):
+            if x == hint:
+                continue
+            yield x
