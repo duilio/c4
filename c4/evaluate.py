@@ -2,6 +2,8 @@ import numpy as np
 
 from c4.board import Board, PLAYER1, PLAYER2
 
+INF = 1000
+
 
 class Evaluator(object):
     def __init__(self, weights=[0, 0, 1, 4, 0]):

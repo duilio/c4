@@ -1,4 +1,4 @@
-from c4.board import Board, PLAYER1, PLAYER2
+from c4.board import Board, PLAYER1, PLAYER2, DRAW
 
 
 class GameHandler(object):
@@ -23,4 +23,11 @@ class GameHandler(object):
             move = player.choose(b)
             b = b.move(move)
 
-        return b
+        if b.end == DRAW:
+            winner = None
+            looser = None
+        else:
+            winner = players[b.end]
+            looser = players[PLAYER1 if b.end == PLAYER2 else PLAYER2]
+        
+        return b, winner, looser

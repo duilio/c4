@@ -23,3 +23,6 @@ class GreedyEngine(Engine):
 
         print 'Bestscore:', bestscore
         return bestmove
+
+    def __str__(self):
+        return 'Greedy'

@@ -1,55 +1,65 @@
 import time
+from collections import defaultdict
 
 from c4.board import DRAW
+from c4.evaluate import INF
 from c4.engine.greedy import GreedyEngine
-
-INF = 1000
 
 
 class NegamaxEngine(GreedyEngine):
+    FORMAT_STAT = (
+        'score: {score} [time: {time}s, pv: {pv}]\n' +
+        'nps: {nps}, nodes: {nodes}, leaves: {leaves}, draws: {draws}, mates: {mates}'
+        )
+
     def __init__(self, maxdepth=4):
         super(NegamaxEngine, self).__init__()
         self._maxdepth = maxdepth
 
     def choose(self, board):
-        self._nodes = 0
-        self._leaves = 0
-        self._draws = 0
-        self._mates = 0
-        startt = time.time()
-
+        self.initcnt()
         pv, score = self.search(board, self._maxdepth)
 
-        t = time.time() - startt
-        if t:
-            nps = self._nodes / t
-        else:
-            nps = 0
+        self.showstats(pv, score)
         
-        print 'score: %s [time: %s, pv: %s]' % (score, t,
-                                                ', '.join(str(x+1) for x in pv))
-        print 'nps: %s, nodes: %s, leaves: %s, draws: %s, mates: %s' % (nps,
-                                                                        self._nodes,
-                                                                        self._leaves,
-                                                                        self._draws,
-                                                                        self._mates)
         return pv[0]
 
+    def initcnt(self):
+        self._startt = time.time()
+        self._counters = cnt = defaultdict(int)
+        cnt['nodes'] = 0
+        cnt['leaves'] = 0
+        cnt['draws'] = 0
+        cnt['mates'] = 0
+
+    def inc(self, cnt):
+        self._counters[cnt] += 1
+
+    def showstats(self, pv, score):
+        t = time.time() - self._startt
+        if t:
+            nps = self._counters['nodes'] / t
+        else:
+            nps = 0
+
+        pv = ', '.join(str(x+1) for x in pv)
+
+        ctx = self._counters.copy()
+        ctx['pv'] = pv
+        ctx['nps'] = nps
+        ctx['score'] = score
+        ctx['time'] = t
+        
+        print self.FORMAT_STAT.format(**ctx)
+    
     def search(self, board, depth, ply=1):
-        self._nodes += 1
+        self.inc('nodes')
 
         if board.end is not None:
-            self._leaves += 1
-
-            if board.end == DRAW:
-                self._draws += 1
-                return [], 0
-            else:
-                self._mates += 1
-                return [], -(INF - ply)
+            return self.endscore(board, ply)
 
         if depth <= 0:
-            self._leaves += 1
+            self.inc('leaves')
             return [], self.evaluate(board)
 
         bestmove = []
@@ -62,3 +72,15 @@ class NegamaxEngine(GreedyEngine):
                 bestmove = [m] + nextmoves
 
         return bestmove, bestscore
+
+    def endscore(self, board, ply):
+        self.inc('leaves')
+        if board.end == DRAW:
+            self.inc('draws')
+            return [], 0
+        else:
+            self.inc('mates')
+            return [], -(INF - ply)
+
+    def __str__(self):
+        return 'Negamax(%s)' % self._maxdepth

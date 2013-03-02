@@ -3,6 +3,9 @@ from c4.engine.base import Engine
 
 
 class HumanEngine(Engine):
+    def __init__(self, name):
+        self.name = name
+
     def choose(self, board):
         """Ask the user to choose the move"""
 
@@ -18,3 +21,6 @@ class HumanEngine(Engine):
             else:
                 break
         return move
+
+    def __str__(self):
+        return self.name
