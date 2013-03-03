@@ -158,6 +158,7 @@ Some tips on what should be improved:
   that is composed by a search algorithm, a cache, an evaluator and a move order strategy.
   Iterative deepening can just wraps a search instead of mix in it.
 * Better parameter configuration.
+* Tests.
 * Time control.
 * More algorithms.
 
