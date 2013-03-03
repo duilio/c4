@@ -9,15 +9,15 @@ class HumanEngine(Engine):
     def choose(self, board):
         """Ask the user to choose the move"""
 
-        print board
+        print(board)
         while True:
             try:
-                move = int(raw_input('Your move: ')) - 1
+                move = int(input('Your move: ')) - 1
                 board.move(move)
             except ValueError:
-                print 'Wrong move! Must be an integer between 1-8.'
+                print('Wrong move! Must be an integer between 1-8.')
             except WrongMoveError as e:
-                print e.message
+                print(e.message)
             else:
                 break
         return move
