@@ -22,7 +22,7 @@ class Cache(object):
         else:
             move = None
         if flip and move is not None:
-            move = 8 - move
+            move = 7 - move
 
         if depth == 0 or depth == -1 or alpha < score < beta:
             state = Cache.EXACT
@@ -61,7 +61,7 @@ class Cache(object):
                 hit = True
 
         if flip and entry.move is not None:
-            move = 8 - entry.move
+            move = 7 - entry.move
         else:
             move = entry.move
 
