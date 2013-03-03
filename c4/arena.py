@@ -25,6 +25,7 @@ def arena(engines):
         stats[name] = Stat()
     
     for e1, e2 in permutations(engines, 2):
+        print("%s vs %s" % (e1, e2))
         game = GameHandler(e1, e2)
         b, winner, looser = game.play()
 
@@ -47,7 +48,7 @@ def arena(engines):
 
         stats[looser_name].loose += 1
 
-    rank = sorted(stats.iteritems(), key=lambda x: x[1].score, reverse=True)
+    rank = sorted(stats.items(), key=lambda x: x[1].score, reverse=True)
     formats = '%-3s  | %-16s | %5s | %4s | %4s | %4s'
     print(formats % ('N.', 'Name', 'Score', 'Win', 'WinX', 'WinO'))
     for i, (name, stat) in enumerate(rank, 1):
