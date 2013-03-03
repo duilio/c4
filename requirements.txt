@@ -1,0 +1,2 @@
+distribute==0.6.31
+numpy==1.7.0
