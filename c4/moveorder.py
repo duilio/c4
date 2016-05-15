@@ -1,4 +1,7 @@
 import random
+from functools import partial
+
+import numpy as np
 
 from c4.board import Board
 from c4.evaluate import Evaluator, INF
@@ -31,48 +34,44 @@ class MoveOrder(object):
         if len(moves) <= 1:
             return moves
 
-        ordered_moves = [(-self.evaluate(board.move(m)), m) for m in moves]
-        ordered_moves.sort(reverse=True)
-        for _, m in ordered_moves:
-            yield m
+        return sorted(moves,
+                      key=lambda m: -self.evaluate(board.move(m)),
+                      reverse=True)
 
     def _order_diff(self, board, moves):
-        def evaldiff(m):
-            r = board.freerow(m)
-            stm = board.stm
-            score = 0
-            for s in Board.segments_around(board, r, m):
-                z = (s == 0).sum() - 1
-                c = (s == stm).sum() + 1
-                assert z >= 0
-                if c + z == 4:
-                    # add player advantages on this area
-                    if c == 4:
-                        return INF
-                    score += (c-1) ** 2
-                else:
-                    # remove enemy advantages on this area
-                    c = 4 - (c+z)
-                    z += 1
-                    assert 1 <= c < 4
-                    if c + z == 4:
-                        score += (c-1) ** 2
-
-            return score
-                    
         if len(moves) <= 1:
             return moves
 
-        ordered_moves = [(evaldiff(m), m) for m in moves]
-        ordered_moves.sort(reverse=True)
-        for _, m in ordered_moves:
-            yield m
+        return sorted(moves, key=partial(evaldiff, board),
+                      reverse=True)
 
     def order(self, board, moves, hint=None):
         if hint is not None:
             yield hint
-        
+
         for x in self._order(board, moves):
             if x == hint:
                 continue
             yield x
+
+
+def evaldiff(board, m):
+    r = board.freerow(m)
+    stm = board.stm
+    other = board.other
+    score = 0
+    for s in Board.segments_around(board, r, m):
+        c = np.bincount(s, minlength=3)
+        c[0] -= 1
+        c[stm] += 1
+
+        if c[0] + c[stm] == 4:
+            # add player advantages on this area
+            if c[stm] == 4:
+                return INF
+            score += (c[stm] - 1) ** 2
+        elif c[stm] == 1:
+            # remove enemy advantages on this area
+            score += c[other] ** 2
+
+    return score
