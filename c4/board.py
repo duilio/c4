@@ -32,6 +32,10 @@ class Board(object):
     def stm(self):
         return self._stm
 
+    @property
+    def other(self):
+        return PLAYER1 if self._stm != PLAYER1 else PLAYER2
+
     @classmethod
     def _check_end(cls, pos):
         for seg in cls.segments(pos):
@@ -117,7 +121,7 @@ class Board(object):
             raise WrongMoveError('Full Column')
         pos[m][r] = self._stm
         end = self._check_end_around(pos, r, m, self._stm)
-        stm = PLAYER1 if self._stm != PLAYER1 else PLAYER2
+        stm = self.other
         return Board(pos, stm, end)
 
     def freerow(self, m):
