@@ -60,15 +60,13 @@ Arena
 ~~~~~
 
 The ``arena`` command runs a tournament between artificial players.
-You need to setup a json file with the options of the player as the following:
+You need to setup a yaml file with the options of the player as the following:
 
-.. code-block:: json
+.. code-block:: yaml
 
-    [
-        {"class": "greedy"},
-        {"class": "pvsdeep",
-         "maxdepth": 6}
-    ]
+    - class: greedy
+    - class: pvsdeep
+      maxdepth: 6
 
 This creates a tournament with 2 players, one that uses the `greedy` engine
 an the other one that uses PVS, Transposition tables and Iterative Deepening with
