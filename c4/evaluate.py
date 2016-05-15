@@ -1,4 +1,3 @@
-from functools import partial
 import numpy as np
 
 from c4.board import Board, PLAYER1, PLAYER2, DRAW
@@ -23,7 +22,7 @@ class Evaluator(object):
                 return -INF
 
         segments = Board.segments(board)
-        filtered_segments = segments[segments.sum(1) > 0]
+        filtered_segments = segments[segments.any(1)]
 
         for s in filtered_segments:
             c = np.bincount(s, minlength=3)
