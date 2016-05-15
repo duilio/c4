@@ -67,8 +67,7 @@ class Board(object):
     @classmethod
     def segments(cls, pos):
         if isinstance(pos, Board):
-            for x in cls.segments(pos._pos):
-                yield x
+            yield from cls.segments(pos._pos)
         else:
             pos = pos.flatten()
             for x in pos[all_segments]:
@@ -77,8 +76,7 @@ class Board(object):
     @classmethod
     def segments_around(cls, pos, r, c):
         if isinstance(pos, Board):
-            for x in cls.segments_around(pos._pos, r, c):
-                yield x
+            yield from cls.segments_around(pos._pos, r, c)
         else:
             idx = c * pos.shape[1] + r
             pos = pos.flatten()
