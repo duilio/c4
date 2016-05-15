@@ -2,9 +2,9 @@ import numpy as np
 
 
 all_segments = []
-rev_segments = [[] for x in range(8*7)]
+rev_segments = [[] for x in range(7*6)]
 
-_indices = np.arange(8*7).reshape((8, 7))
+_indices = np.arange(7*6).reshape((7, 6))
 
 
 def add_rev(line):
@@ -21,7 +21,7 @@ for row in _indices.transpose():
     add_rev(row)
 
 for idx in (_indices, _indices[:, ::-1]):
-    for di in range(-8, 8):
+    for di in range(-7, 7):
         diag = idx.diagonal(di)
         add_rev(diag)
 

@@ -14,7 +14,7 @@ class WrongMoveError(Exception):
 
 
 class Board(object):
-    def __init__(self, pos=None, stm=PLAYER1, end=COMPUTE, cols=8, rows=7):
+    def __init__(self, pos=None, stm=PLAYER1, end=COMPUTE, cols=7, rows=6):
         if pos is None:
             pos = np.zeros((cols, rows), dtype=int)
         self._pos = pos
@@ -92,8 +92,8 @@ class Board(object):
         s = []
         for row in reversed(self._pos.transpose()):
             s.append(' | '.join(disc[x] for x in row))
-        s.append(' | '.join('-'*8))
-        s.append(' | '.join(map(str, range(1, 9))))
+        s.append(' | '.join('-'*7))
+        s.append(' | '.join(map(str, range(1, 8))))
         s = ['| ' + x + ' |' for x in s]
         s = [i + ' ' + x for i, x in zip('ABCDEFG  ', s)]
         s = '\n'.join(s)
@@ -107,7 +107,7 @@ class Board(object):
         return s
 
     def move(self, m):
-        if not (0 <= m < 8):
+        if not (0 <= m < 7):
             raise ValueError(m)
 
         pos = self._pos.copy()

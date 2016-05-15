@@ -12,7 +12,7 @@ class AlphaBetaEngine(NegamaxEngine):
         'leaves: {leaves}, draws: {draws}, mates: {mates}'
         )
 
-    def __init__(self, maxdepth, ordering='seq'):
+    def __init__(self, maxdepth=4, ordering='seq'):
         super(AlphaBetaEngine, self).__init__(maxdepth)
         self.moveorder = MoveOrder(ordering).order
 
