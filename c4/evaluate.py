@@ -24,12 +24,13 @@ class Evaluator(object):
         segments = Board.segments(board)
 
         for s in segments:
-            z = (s == 0).sum()
-            if z == 4:
+            c = np.bincount(s, minlength=3)
+            if c[0] == 4:
                 continue
 
-            c1 = (s == PLAYER1).sum()
-            c2 = 4 - (z+c1)
+            c1 = c[PLAYER1]
+            c2 = c[PLAYER2]
+
             if c2 == 0:
                 scores[PLAYER1][c1] += 1
             elif c1 == 0:
