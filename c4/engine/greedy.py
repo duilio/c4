@@ -14,7 +14,7 @@ class GreedyEngine(Engine):
 
         bestmove = m
         bestscore = -self.evaluate(board.move(m))
-        
+
         for m in moves:
             score = -self.evaluate(board.move(m))
             if score > bestscore:
