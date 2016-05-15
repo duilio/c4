@@ -8,7 +8,7 @@ from c4.engine.greedy import GreedyEngine
 
 class NegamaxEngine(GreedyEngine):
     FORMAT_STAT = (
-        'score: {score} [time: {time}s, pv: {pv}]\n' +
+        'score: {score} [time: {time:0.3f}s, pv: {pv}]\n' +
         'nps: {nps}, nodes: {nodes}, leaves: {leaves}, draws: {draws}, mates: {mates}'
         )
 

@@ -51,7 +51,7 @@ class PVSEngine(AlphaBetaEngine):
 
 class PVSCachedEngine(CachedEngineMixin, PVSEngine):
     FORMAT_STAT = (
-        'score: {score} [time: {time}s, pv: {pv}]\n' +
+        'score: {score} [time: {time:0.3f}s, pv: {pv}]\n' +
         'nps: {nps}, nodes: {nodes}, betacuts: {betacuts}\n' +
         'hits: {hits}, leaves: {leaves}, draws: {draws}, mates: {mates}'
         )
@@ -66,7 +66,7 @@ class PVSCachedEngine(CachedEngineMixin, PVSEngine):
 
 class PVSDeepEngine(CachedEngineMixin, IterativeDeepeningEngineMixin, PVSEngine):
     FORMAT_STAT = (
-        '[depth: {depth}] score: {score} [time: {time}s, pv: {pv}]\n' +
+        '[depth: {depth}] score: {score} [time: {time:0.3f}s, pv: {pv}]\n' +
         'nps: {nps}, nodes: {nodes}, betacuts: {betacuts}\n' +
         'hits: {hits}, leaves: {leaves}, draws: {draws}, mates: {mates}'
         )

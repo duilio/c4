@@ -7,7 +7,7 @@ from c4.engine.deepening import IterativeDeepeningEngineMixin
 
 class AlphaBetaEngine(NegamaxEngine):
     FORMAT_STAT = (
-        'score: {score} [time: {time}s, pv: {pv}]\n' +
+        'score: {score} [time: {time:0.3f}s, pv: {pv}]\n' +
         'nps: {nps}, nodes: {nodes}, betacuts: {betacuts}\n' +
         'leaves: {leaves}, draws: {draws}, mates: {mates}'
         )
@@ -54,7 +54,7 @@ class AlphaBetaEngine(NegamaxEngine):
 
 class ABCachedEngine(CachedEngineMixin, AlphaBetaEngine):
     FORMAT_STAT = (
-        'score: {score} [time: {time}s, pv: {pv}]\n' +
+        'score: {score} [time: {time:0.3f}s, pv: {pv}]\n' +
         'nps: {nps}, nodes: {nodes}, betacuts: {betacuts}\n' +
         'hits: {hits}, leaves: {leaves}, draws: {draws}, mates: {mates}'
         )
@@ -69,7 +69,7 @@ class ABCachedEngine(CachedEngineMixin, AlphaBetaEngine):
 
 class ABDeepEngine(CachedEngineMixin, IterativeDeepeningEngineMixin, AlphaBetaEngine):
     FORMAT_STAT = (
-        '[depth: {depth}] score: {score} [time: {time}s, pv: {pv}]\n' +
+        '[depth: {depth}] score: {score} [time: {time:0.3f}s, pv: {pv}]\n' +
         'nps: {nps}, nodes: {nodes}, betacuts: {betacuts}\n' +
         'hits: {hits}, leaves: {leaves}, draws: {draws}, mates: {mates}'
         )
