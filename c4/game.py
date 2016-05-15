@@ -14,7 +14,7 @@ class GameHandler(object):
             PLAYER1: self.engine1,
             PLAYER2: self.engine2
             }
-        
+
         while b.end is None:
             if self.verbose:
                 print(b)
@@ -29,5 +29,5 @@ class GameHandler(object):
         else:
             winner = players[b.end]
             looser = players[PLAYER1 if b.end == PLAYER2 else PLAYER2]
-        
+
         return b, winner, looser

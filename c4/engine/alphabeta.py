@@ -3,7 +3,7 @@ from c4.engine.negamax import NegamaxEngine
 from c4.moveorder import MoveOrder
 from c4.engine.cached import CachedEngineMixin
 from c4.engine.deepening import IterativeDeepeningEngineMixin
-        
+
 
 class AlphaBetaEngine(NegamaxEngine):
     FORMAT_STAT = (

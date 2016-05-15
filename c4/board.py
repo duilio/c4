@@ -1,5 +1,3 @@
-from itertools import chain
-
 import numpy as np
 
 from c4.tables import rev_segments, all_segments
@@ -25,7 +23,7 @@ class Board(object):
             self._end = self._check_end(pos)
         else:
             self._end = end
-        
+
     @property
     def end(self):
         return self._end
@@ -57,7 +55,7 @@ class Board(object):
             return None
         else:
             return DRAW
-        
+
     @classmethod
     def linear_segments(cls, line):
         for x in range(len(line) - 3):
