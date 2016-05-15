@@ -67,11 +67,10 @@ class Board(object):
     @classmethod
     def segments(cls, pos):
         if isinstance(pos, Board):
-            yield from cls.segments(pos._pos)
+            return cls.segments(pos._pos)
         else:
             pos = pos.flatten()
-            for x in pos[all_segments]:
-                yield x
+            return pos[all_segments]
 
     @classmethod
     def segments_around(cls, pos, r, c):
