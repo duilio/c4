@@ -4,9 +4,11 @@ import json
 import argparse
 
 from c4.board import Board, DRAW
-from c4.engine import GreedyEngine, NegamaxEngine, \
-    AlphaBetaEngine, ABCachedEngine, ABDeepEngine, \
+from c4.engine import (
+    GreedyEngine, RandomEngine, NegamaxEngine,
+    AlphaBetaEngine, ABCachedEngine, ABDeepEngine,
     PVSEngine, PVSCachedEngine, PVSDeepEngine
+)
 from c4.engine.human import HumanEngine
 from c4.game import GameHandler
 from c4.arena import arena
@@ -14,6 +16,7 @@ from c4.arena import arena
 
 engine_map = {
     'greedy': GreedyEngine,
+    'random': RandomEngine,
     'negamax': NegamaxEngine,
     'alphabeta': AlphaBetaEngine,
     'abcached': ABCachedEngine,
@@ -26,13 +29,16 @@ engine_map = {
 
 def main():
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(title='Commands', description='c4 builin commands')
+    subparsers = parser.add_subparsers(title='Commands',
+                                       description='c4 builin commands')
 
     game_parser = subparsers.add_parser('game', help='Play with an engine')
-    game_parser.add_argument('engine', metavar='ENGINE',
-                             help='Engine to use. Format: engine_name:par1:par2:...')
-    game_parser.add_argument('--player2', default=False, action='store_true',
-                             help='Play as player 2')
+    game_parser.add_argument(
+        'engine', metavar='ENGINE',
+        help='Engine to use. Format: engine_name:par1:par2:...')
+    game_parser.add_argument(
+        '--player2', default=False, action='store_true',
+        help='Play as player 2')
     game_parser.set_defaults(cmd=run_game)
 
     arena_parser = subparsers.add_parser('arena', help='Run arena')
@@ -41,8 +47,9 @@ def main():
     arena_parser.set_defaults(cmd=run_arena)
 
     bm_parser = subparsers.add_parser('bm', help='Select the bestmove')
-    bm_parser.add_argument('engine', metavar='ENGINE',
-                           help='Engine to use. Format: engine_name:par1:par2:...')
+    bm_parser.add_argument(
+        'engine', metavar='ENGINE',
+        help='Engine to use. Format: engine_name:par1:par2:...')
     bm_parser.set_defaults(cmd=run_bm)
 
     args = parser.parse_args()
@@ -56,14 +63,14 @@ def run_game(args):
 
     name = input('Your name: ')
     human = HumanEngine(name)
-    
+
     if not args.player2:
         p1 = human
         p2 = engine
     else:
-        p1  = engine
+        p1 = engine
         p2 = human
-    
+
     b, winner, looser = GameHandler(p1, p2).play()
     if winner is human:
         print('Congratulation: you win')
@@ -87,7 +94,7 @@ def run_bm(args):
     engine_class = engine_map[engine_name]
     engine = engine_class(*engine_args)
     engine.choose(Board())
-    
-    
+
+
 if __name__ == '__main__':
     sys.exit(main())
