@@ -35,9 +35,12 @@ class Board(object):
     @classmethod
     def _check_end(cls, pos):
         for seg in cls.segments(pos):
-            if (seg == PLAYER1).all():
+            c = np.bincount(seg)
+            if c[0]:
+                continue
+            if c[PLAYER1] == 4:
                 return PLAYER1
-            elif (seg == PLAYER2).all():
+            elif c[PLAYER2] == 4:
                 return PLAYER2
 
         if (pos == 0).any():
