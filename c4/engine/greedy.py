@@ -1,7 +1,8 @@
 import numpy as np
 
-from c4.evaluate import Evaluator, INF
+from c4.moveorder import evaldiff
 from c4.engine.base import Engine
+from c4.evaluate import Evaluator, INF
 
 
 class GreedyEngine(Engine):
@@ -47,12 +48,11 @@ class WeightedGreedyEngine(Engine):
             return moves[0]
 
         # winning move?
-        scores = [-self.evaluate(board.move(m)) for m in moves]
-        if max(scores) == INF:
-            return sorted(zip(scores, moves), reverse=True)[0][1]
+        scores = [evaldiff(board, m) for m in moves]
+        if max(scores) >= INF - 1:
+            return max(zip(scores, moves))[1]
 
-        scores = np.array(scores, dtype=float)
-        weights = scores + (abs(scores.min()) + 1)
+        weights = np.array(scores, dtype=float) + 1
 
         if weights.sum() == 0:
             weights = np.array([1 / len(moves)] * len(moves), dtype=float)
@@ -60,9 +60,9 @@ class WeightedGreedyEngine(Engine):
             weights /= weights.sum()
 
         selected_move = np.random.choice(moves, p=weights)
-        selected_score = scores[list(moves).index(selected_move)]
 
         if self._verbose:
+            selected_score = scores[list(moves).index(selected_move)]
             print('Selected move %d with score %s' % (selected_move,
                                                       selected_score))
 
