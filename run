@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 import sys
-import yaml
+import random
 import argparse
+
+import yaml
 
 from c4.board import Board, DRAW
 from c4.engine import (
-    GreedyEngine, RandomEngine, NegamaxEngine,
-    AlphaBetaEngine, ABCachedEngine, ABDeepEngine,
+    GreedyEngine, WeightedGreedyEngine, RandomEngine,
+    NegamaxEngine, AlphaBetaEngine, ABCachedEngine, ABDeepEngine,
     PVSEngine, PVSCachedEngine, PVSDeepEngine
 )
 from c4.engine.human import HumanEngine
@@ -16,6 +18,7 @@ from c4.arena import arena
 
 engine_map = {
     'greedy': GreedyEngine,
+    'weighted': WeightedGreedyEngine,
     'random': RandomEngine,
     'negamax': NegamaxEngine,
     'alphabeta': AlphaBetaEngine,
@@ -93,8 +96,10 @@ def run_bm(args):
     engine_name, *engine_args = args.engine.split(':')
     engine_class = engine_map[engine_name]
     engine = engine_class(*engine_args)
-    engine.choose(Board())
+    move = engine.choose(Board())
+    print('Move: %d' % (move + 1))
 
 
 if __name__ == '__main__':
+    random.seed()
     sys.exit(main())

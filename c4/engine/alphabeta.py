@@ -67,7 +67,8 @@ class ABCachedEngine(CachedEngineMixin, AlphaBetaEngine):
         return 'ABCache(%s)' % self._maxdepth
 
 
-class ABDeepEngine(CachedEngineMixin, IterativeDeepeningEngineMixin, AlphaBetaEngine):
+class ABDeepEngine(CachedEngineMixin, IterativeDeepeningEngineMixin,
+                   AlphaBetaEngine):
     FORMAT_STAT = (
         '[depth: {depth}] score: {score} [time: {time:0.3f}s, pv: {pv}]\n' +
         'nps: {nps}, nodes: {nodes}, betacuts: {betacuts}\n' +
