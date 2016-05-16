@@ -79,12 +79,11 @@ class Board(object):
     @classmethod
     def segments_around(cls, pos, r, c):
         if isinstance(pos, Board):
-            yield from cls.segments_around(pos._pos, r, c)
+            return cls.segments_around(pos._pos, r, c)
         else:
             idx = c * pos.shape[1] + r
             pos = pos.flatten()
-            for seg in rev_segments[idx]:
-                yield pos[seg]
+            return pos[rev_segments[idx]]
 
     def __str__(self):
         disc = {

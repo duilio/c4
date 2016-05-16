@@ -26,3 +26,4 @@ for idx in (_indices, _indices[:, ::-1]):
         add_rev(diag)
 
 all_segments = np.asarray(all_segments)
+rev_segments = np.asarray([np.asarray(x) for x in rev_segments])
