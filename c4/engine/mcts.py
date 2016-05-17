@@ -16,18 +16,21 @@ class MonteCarloTreeSearch(Engine):
         self._stats = defaultdict(lambda: [0, 0])
 
     def choose(self, board):
-        stats = self.search(board, self.simulations, self.C)
-        return self.select_best_move(stats, board)
+        stats, depth = self.search(board, self.simulations, self.C)
+        return self.select_best_move(stats, depth, board)
 
     def search(self, board, simulations, C):
         stats = self._stats
         root = board
+        max_depth = 0
+
         for i in range(simulations):
             node = root
             states = [node.hashkey()]
             transactions = []
 
             # select leaf node
+            depth = 0
             while node.end is None:
                 move, select = self.select_next_move(stats, node, C)
                 transactions.append(move)
@@ -36,6 +39,9 @@ class MonteCarloTreeSearch(Engine):
 
                 if not select:
                     break
+
+                depth += 1
+            max_depth = max(depth, max_depth)
 
             # run simulation if not at the end of the game tree
             if node.end is None:
@@ -52,7 +58,7 @@ class MonteCarloTreeSearch(Engine):
                 stats[state, move][0] += 1
                 stats[state, move][1] += result
 
-        return stats
+        return stats, max_depth
 
     def simulate(self, board):
         engine = self.simulation_engine
@@ -89,19 +95,24 @@ class MonteCarloTreeSearch(Engine):
         assert bestmove is not None
         return bestmove, True
 
-    def select_best_move(self, stats, board):
+    def select_best_move(self, stats, depth, board):
         """Select the best move at the end of the Monte Carlo tree search"""
 
         bestscore = 0
         bestmove = None
         k = board.hashkey()
+        total_n = 0
         for m in board.moves():
             n, w = stats[k, m]
-            print('Move %d score: %d/%d' % (m+1, w, n))
+            total_n += n
+            print('Move %d score: %d/%d (%0.1f%%)' % (m+1, w, n, w/n*100))
             if n > bestscore:
                 bestmove = m
                 bestscore = n
         assert bestmove is not None
+
+        print('Maximum depth: %d, Total simulations: %d' % (depth, total_n))
+
         return bestmove
 
     def __str__(self):
