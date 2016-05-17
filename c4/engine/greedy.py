@@ -1,6 +1,6 @@
 import numpy as np
 
-from c4.moveorder import evaldiff
+from c4.evaldiff import evaldiff
 from c4.engine.base import Engine
 from c4.evaluate import Evaluator, INF
 
