@@ -3,7 +3,6 @@ from collections import defaultdict
 
 from c4.engine.base import Engine
 from c4.engine.greedy import WeightedGreedyEngine
-#from c4.engine.random import RandomEngine
 from c4.evaluate import DRAW
 
 
