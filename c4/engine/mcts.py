@@ -30,6 +30,7 @@ class MonteCarloTreeSearch(Engine):
             # select leaf node
             depth = 0
             while node.end is None:
+                depth += 1
                 move, select = self.select_next_move(stats, node, C)
                 node = node.move(move)
                 states.append(node.hashkey())
@@ -37,7 +38,6 @@ class MonteCarloTreeSearch(Engine):
                 if not select:
                     break
 
-                depth += 1
             max_depth = max(depth, max_depth)
 
             # run simulation if not at the end of the game tree
