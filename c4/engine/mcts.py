@@ -1,9 +1,9 @@
 import math
 from collections import defaultdict
 
+from c4.evaluate import DRAW
 from c4.engine.base import Engine
 from c4.engine.greedy import WeightedGreedyEngine
-from c4.evaluate import DRAW
 
 
 class MonteCarloTreeSearch(Engine):
@@ -25,14 +25,12 @@ class MonteCarloTreeSearch(Engine):
 
         for i in range(simulations):
             node = root
-            states = [node.hashkey()]
-            transactions = []
+            states = []
 
             # select leaf node
             depth = 0
             while node.end is None:
                 move, select = self.select_next_move(stats, node, C)
-                transactions.append(move)
                 node = node.move(move)
                 states.append(node.hashkey())
 
@@ -52,10 +50,10 @@ class MonteCarloTreeSearch(Engine):
                     result = 0
 
             # propagate results
-            for state, move in list(zip(states[:-1], transactions))[::-1]:
+            for state in reversed(states):
                 result = 1 - result
-                stats[state, move][0] += 1
-                stats[state, move][1] += result
+                stats[state][0] += 1
+                stats[state][1] += result
 
         return stats, max_depth
 
@@ -76,20 +74,21 @@ class MonteCarloTreeSearch(Engine):
     def select_next_move(self, stats, board, C):
         """Select the next state and consider if it should be expanded"""
 
-        k = board.hashkey()
         bestscore = None
         bestmove = None
-        total_n = sum(stats[k, m][0] for m in board.moves())
 
-        for m in board.moves():
-            n, w = stats[k, m]
+        children = [(m, stats[board.move(m).hashkey()]) for m in board.moves()]
+        total_n = sum(x[0] for x in children)
+
+        for child_move, child_stat in children:
+            n, w = child_stat
             if n == 0:
-                return m, False
+                return child_move, False
             else:
                 score = (w / n) + C * math.sqrt(2 * math.log(total_n) / n)
                 if bestscore is None or score > bestscore:
                     bestscore = score
-                    bestmove = m
+                    bestmove = child_move
 
         assert bestmove is not None
         return bestmove, True
@@ -99,10 +98,9 @@ class MonteCarloTreeSearch(Engine):
 
         bestscore = 0
         bestmove = None
-        k = board.hashkey()
         total_n = 0
         for m in board.moves():
-            n, w = stats[k, m]
+            n, w = stats[board.move(m).hashkey()]
             total_n += n
             print('Move %d score: %d/%d (%0.1f%%)' % (m+1, w, n, w/n*100))
             if n > bestscore:
