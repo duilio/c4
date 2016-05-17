@@ -13,18 +13,14 @@ class MonteCarloTreeSearch(Engine):
         self.simulations = int(simulations)
         self.C = float(C)
         self.simulation_engine = WeightedGreedyEngine(False)
+        self._stats = defaultdict(lambda: [0, 0])
 
     def choose(self, board):
         stats = self.search(board, self.simulations, self.C)
         return self.select_best_move(stats, board)
 
     def search(self, board, simulations, C):
-        stats = defaultdict(lambda: [0, 0])
-        k = board.hashkey()
-        actions = list(board.moves())
-        for m in actions:
-            stats[k, m] = [0, 0]
-
+        stats = self._stats
         root = board
         for i in range(simulations):
             node = root
@@ -33,12 +29,12 @@ class MonteCarloTreeSearch(Engine):
 
             # select leaf node
             while node.end is None:
-                move, expand = self.select_next_move(stats, node, C)
+                move, select = self.select_next_move(stats, node, C)
                 transactions.append(move)
                 node = node.move(move)
                 states.append(node.hashkey())
 
-                if not expand:
+                if not select:
                     break
 
             # run simulation if not at the end of the game tree
