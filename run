@@ -4,6 +4,7 @@ import random
 import argparse
 
 import yaml
+import numpy as np
 
 from c4.board import Board, DRAW
 from c4.engine import (
@@ -63,6 +64,7 @@ def main():
     args = parser.parse_args()
 
     if args.static_seed is not None:
+        np.random.seed(args.static_seed)
         random.seed(args.static_seed)
 
     args.cmd(args)
