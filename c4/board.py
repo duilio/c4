@@ -47,26 +47,20 @@ class Board(object):
             elif c[PLAYER2] == 4:
                 return PLAYER2
 
-        if (pos == 0).any():
-            return None
-        else:
+        if pos.all():
             return DRAW
+        else:
+            return None
 
     @classmethod
     def _check_end_around(cls, pos, r, c, side):
-        for seg in cls.segments_around(pos, r, c):
-            if (seg == side).all():
-                return side
+        if (cls.segments_around(pos, r, c) == side).all(1).any():
+            return side
 
-        if (pos == 0).any():
-            return None
-        else:
+        if pos.all():
             return DRAW
-
-    @classmethod
-    def linear_segments(cls, line):
-        for x in range(len(line) - 3):
-            yield line[x:x+4]
+        else:
+            return None
 
     @classmethod
     def segments(cls, pos):
