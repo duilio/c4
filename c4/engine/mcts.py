@@ -1,4 +1,5 @@
 import math
+import random
 from collections import defaultdict
 
 from c4.evaluate import DRAW
@@ -33,7 +34,7 @@ class MonteCarloTreeSearch(Engine):
                 depth += 1
                 move, select = self.select_next_move(stats, node, C)
                 node = node.move(move)
-                states.append(node.hashkey())
+                states.append(node.hashkey()[0])
 
                 if not select:
                     break
@@ -77,7 +78,8 @@ class MonteCarloTreeSearch(Engine):
         bestscore = None
         bestmove = None
 
-        children = [(m, stats[board.move(m).hashkey()]) for m in board.moves()]
+        children = [(m, stats[board.move(m).hashkey()[0]])
+                    for m in board.moves()]
         total_n = sum(x[0] for (_, x) in children)
 
         for child_move, child_stat in children:
@@ -99,11 +101,13 @@ class MonteCarloTreeSearch(Engine):
         bestscore = 0
         bestmove = None
         total_n = 0
-        for m in board.moves():
-            n, w = stats[board.move(m).hashkey()]
+        moves = board.moves()
+
+        for m in moves:
+            n, w = stats[board.move(m).hashkey()[0]]
             total_n += n
             print('Move %d score: %d/%d (%0.1f%%)' % (m+1, w, n, w/n*100))
-            if n > bestscore:
+            if n > bestscore or (n == bestscore and random.random() <= 0.5):
                 bestmove = m
                 bestscore = n
         assert bestmove is not None
