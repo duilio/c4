@@ -3,6 +3,7 @@ import numpy as np
 from c4.board import Board
 from c4.evaluate import INF
 
+
 def evaldiff(board, m):
     r = board.freerow(m)
 
