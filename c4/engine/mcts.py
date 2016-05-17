@@ -41,13 +41,14 @@ class MonteCarloTreeSearch(Engine):
             if node.end is None:
                 result = self.simulate(node)
             else:
-                result = node.end
-                if result != 0:
-                    result = -1.0
+                if node.end == 0:
+                    result = 0.5
+                else:
+                    result = 0
 
             # propagate results
             for state, move in list(zip(states[:-1], transactions))[::-1]:
-                result = -result
+                result = 1 - result
                 stats[state, move][0] += 1
                 stats[state, move][1] += result
 
@@ -61,11 +62,11 @@ class MonteCarloTreeSearch(Engine):
             node = node.move(m)
 
         if node.end == DRAW:
-            return 0
+            return 0.5
         elif node.end == board.stm:
             return 1
         else:
-            return -1
+            return 0
 
     def select_next_move(self, stats, board, C):
         """Select the next state and consider if it should be expanded"""
