@@ -34,6 +34,9 @@ engine_map = {
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-s', '--static-seed', default=None, type=int,
+        help='Force a static seed for reproducible experiments')
     subparsers = parser.add_subparsers(title='Commands',
                                        description='c4 builin commands')
 
@@ -58,6 +61,10 @@ def main():
     bm_parser.set_defaults(cmd=run_bm)
 
     args = parser.parse_args()
+
+    if args.static_seed is not None:
+        random.seed(args.static_seed)
+
     args.cmd(args)
 
 
