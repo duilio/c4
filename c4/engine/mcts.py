@@ -78,7 +78,7 @@ class MonteCarloTreeSearch(Engine):
         bestmove = None
 
         children = [(m, stats[board.move(m).hashkey()]) for m in board.moves()]
-        total_n = sum(x[0] for x in children)
+        total_n = sum(x[0] for (_, x) in children)
 
         for child_move, child_stat in children:
             n, w = child_stat
