@@ -53,6 +53,8 @@ def main():
     arena_parser = subparsers.add_parser('arena', help='Run arena')
     arena_parser.add_argument('config', metavar='CONFIGFILE',
                               type=argparse.FileType('r'))
+    arena_parser.add_argument('-r', '--rounds', type=int, default=1,
+                              help='Number of rounds')
     arena_parser.set_defaults(cmd=run_arena)
 
     bm_parser = subparsers.add_parser('bm', help='Select the bestmove')
@@ -95,12 +97,24 @@ def run_game(args):
 def run_arena(args):
     config = yaml.load(args.config)
     engines = []
-    for engine_cfg in config:
+    subscribed_engines = set()
+    for i, engine_cfg in enumerate(config):
         engine_class = engine_map[engine_cfg.pop('class')]
+        engine_name = engine_cfg.pop('name', None)
         engine = engine_class(**engine_cfg)
-        engines.append(engine)
+        if engine_name is None:
+            engine_name = str(engine)
+        if engine_name not in subscribed_engines:
+            subscribed_engines.add(engine_name)
+        else:
+            print('Error: engine name %s collides, '
+                  'use "name" attribute to make it unique' % engine_name,
+                  file=sys.stderr)
+            sys.exit(1)
 
-    arena(engines)
+        engines.append((engine_name, engine))
+
+    arena(engines, args.rounds)
 
 
 def run_bm(args):

@@ -47,7 +47,7 @@ class WeightedGreedyEngine(Engine):
         if len(moves) < 2:
             return moves[0]
 
-        # winning move?
+        # winning move or threat blocking?
         scores = [evaldiff(board, m) for m in moves]
         if max(scores) >= INF - 1:
             return max(zip(scores, moves))[1]
