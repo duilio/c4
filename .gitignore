@@ -3,4 +3,6 @@
 *.pyc
 *.lprof
 *.prof
-
+games/
+datasets/
+models/
