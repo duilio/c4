@@ -4,18 +4,25 @@ from c4.engine.random import RandomEngine
 from c4.engine.mcts import MonteCarloTreeSearch
 from c4.engine.negamax import NegamaxEngine
 from c4.engine.alphabeta import AlphaBetaEngine, ABCachedEngine, ABDeepEngine
-from c4.engine.pvs import PVSEngine, PVSCachedEngine, PVSDeepEngine
+from c4.engine.pvs import (
+    PVSEngine, PVSCachedEngine, PVSDeepEngine, PVSBookEngine
+)
+from c4.engine.simplenn import SimpleNNEngine
 
 
-__all__ = ['Engine',
-           'GreedyEngine',
-           'WeightedGreedyEngine',
-           'RandomEngine',
-           'MonteCarloTreeSearch',
-           'NegamaxEngine',
-           'AlphaBetaEngine',
-           'ABCachedEngine',
-           'ABDeepEngine',
-           'PVSEngine',
-           'PVSCachedEngine',
-           'PVSDeepEngine']
+__all__ = [
+    'Engine',
+    'GreedyEngine',
+    'WeightedGreedyEngine',
+    'RandomEngine',
+    'MonteCarloTreeSearch',
+    'NegamaxEngine',
+    'AlphaBetaEngine',
+    'ABCachedEngine',
+    'ABDeepEngine',
+    'PVSEngine',
+    'PVSCachedEngine',
+    'PVSDeepEngine',
+    'PVSBookEngine',
+    'SimpleNNEngine',
+]

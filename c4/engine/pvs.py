@@ -2,6 +2,7 @@ from c4.evaluate import INF
 from c4.engine.alphabeta import AlphaBetaEngine
 from c4.engine.cached import CachedEngineMixin
 from c4.engine.deepening import IterativeDeepeningEngineMixin
+from c4.engine.book import BookEngineMixin
 
 
 class PVSEngine(AlphaBetaEngine):
@@ -27,8 +28,9 @@ class PVSEngine(AlphaBetaEngine):
                                        -bestscore-1, -bestscore)
                 score = -score
                 if score > bestscore:
-                    nextmoves, score = self.search(board.move(m), depth-1, ply+1,
-                                                   -beta, -bestscore)
+                    nextmoves, score = self.search(
+                        board.move(m), depth-1, ply+1,
+                        -beta, -bestscore)
                 else:
                     continue
 
@@ -64,7 +66,8 @@ class PVSCachedEngine(CachedEngineMixin, PVSEngine):
         return 'PVSCache(%s)' % self._maxdepth
 
 
-class PVSDeepEngine(CachedEngineMixin, IterativeDeepeningEngineMixin, PVSEngine):
+class PVSDeepEngine(CachedEngineMixin, IterativeDeepeningEngineMixin,
+                    PVSEngine):
     FORMAT_STAT = (
         '[depth: {depth}] score: {score} [time: {time:0.3f}s, pv: {pv}]\n' +
         'nps: {nps}, nodes: {nodes}, betacuts: {betacuts}\n' +
@@ -77,3 +80,8 @@ class PVSDeepEngine(CachedEngineMixin, IterativeDeepeningEngineMixin, PVSEngine)
 
     def __str__(self):
         return 'PVSDeep(%s)' % self._maxdepth
+
+
+class PVSBookEngine(BookEngineMixin, PVSDeepEngine):
+    def __str__(self):
+        return 'PVSBook(%s)' % self._maxdepth
