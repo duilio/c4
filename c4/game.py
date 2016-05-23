@@ -6,6 +6,7 @@ class GameHandler(object):
         self.engine1 = engine1
         self.engine2 = engine2
         self.verbose = verbose
+        self.history = []
 
     def play(self):
         b = Board()
@@ -22,6 +23,7 @@ class GameHandler(object):
             player = players[b.stm]
             move = player.choose(b)
             b = b.move(move)
+            self.history.append(move)
 
         if b.end == DRAW:
             winner = None
@@ -29,5 +31,11 @@ class GameHandler(object):
         else:
             winner = players[b.end]
             looser = players[PLAYER1 if b.end == PLAYER2 else PLAYER2]
+            winner.reset()
+            looser.reset()
 
         return b, winner, looser
+
+    def dump(self, file):
+        for move in self.history:
+            print("%d" % move, file=file)
