@@ -5,6 +5,7 @@ Simple Python library with some implementations of algorithms used to
 play `zero-sum games`_.
 
 Some of the algorithms implemented:
+
 * `Negamax`_
 * `Alpha beta pruning`_
 * `Principal variation search`_ (Negascout)
