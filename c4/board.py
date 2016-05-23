@@ -150,3 +150,14 @@ class Board(object):
             return k2, True
         else:
             return k1, False
+
+    def dumps(self):
+        return ''.join([str(x) for x in self._pos.flat]) + str(self._stm)
+
+    @classmethod
+    def loads(self, s, cols=7, rows=6):
+        pos = np.zeros((cols, rows), dtype=int)
+        for i, x in enumerate(s[:-1]):
+            pos.flat[i] = int(x)
+        stm = int(s[-1])
+        return Board(pos, stm)
