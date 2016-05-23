@@ -22,3 +22,7 @@ class CachedEngineMixin(object):
                                                                 hint=move)
             self._cache.put(board, move, depth, ply, score, alpha, beta)
             return move, score
+
+    def reset(self):
+        super(CachedEngineMixin, self).reset()
+        self._cache.clear()
