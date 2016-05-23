@@ -71,3 +71,6 @@ class Cache(object):
             score = None
 
         return hit, move, score
+
+    def clear(self):
+        self._cache.clear()
