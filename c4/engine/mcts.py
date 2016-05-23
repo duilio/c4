@@ -118,3 +118,6 @@ class MonteCarloTreeSearch(Engine):
 
     def __str__(self):
         return 'MCTS(%s, %0.2f)' % (self.simulations, self.C)
+
+    def reset(self):
+        self._stats.clear()
