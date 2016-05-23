@@ -11,7 +11,8 @@ from c4.engine import (
     GreedyEngine, WeightedGreedyEngine, RandomEngine,
     MonteCarloTreeSearch,
     NegamaxEngine, AlphaBetaEngine, ABCachedEngine, ABDeepEngine,
-    PVSEngine, PVSCachedEngine, PVSDeepEngine
+    PVSEngine, PVSCachedEngine, PVSDeepEngine, PVSBookEngine,
+    SimpleNNEngine,
 )
 from c4.engine.human import HumanEngine
 from c4.game import GameHandler
@@ -30,6 +31,8 @@ engine_map = {
     'pvs': PVSEngine,
     'pvscached': PVSCachedEngine,
     'pvsdeep': PVSDeepEngine,
+    'pvsbook': PVSBookEngine,
+    'simplenn': SimpleNNEngine,
     }
 
 
@@ -54,7 +57,9 @@ def main():
     arena_parser.add_argument('config', metavar='CONFIGFILE',
                               type=argparse.FileType('r'))
     arena_parser.add_argument('-r', '--rounds', type=int, default=1,
-                              help='Number of rounds')
+                              metavar='NUMBER', help='Number of rounds')
+    arena_parser.add_argument('-d', '--dump', default=None, metavar='DIRNAME',
+                              help='Root path where to dump all games.')
     arena_parser.set_defaults(cmd=run_arena)
 
     bm_parser = subparsers.add_parser('bm', help='Select the bestmove')
@@ -114,7 +119,7 @@ def run_arena(args):
 
         engines.append((engine_name, engine))
 
-    arena(engines, args.rounds)
+    arena(engines, rounds=args.rounds, dump_root=args.dump)
 
 
 def run_bm(args):
