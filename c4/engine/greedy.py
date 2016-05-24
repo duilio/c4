@@ -2,9 +2,11 @@ import numpy as np
 
 from c4.evaldiff import evaldiff
 from c4.engine.base import Engine
+from c4.engine.registry import registry
 from c4.evaluate import Evaluator, INF
 
 
+@registry.add('greedy')
 class GreedyEngine(Engine):
     def __init__(self):
         self._evaluator = Evaluator()
@@ -31,6 +33,7 @@ class GreedyEngine(Engine):
         return 'Greedy'
 
 
+@registry.add('weighted')
 class WeightedGreedyEngine(Engine):
     """Same as GreedyEngine but move randomly using scores as weights
 

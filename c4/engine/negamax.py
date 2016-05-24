@@ -4,8 +4,10 @@ from collections import defaultdict
 from c4.board import DRAW
 from c4.evaluate import INF
 from c4.engine.greedy import GreedyEngine
+from c4.engine.registry import registry
 
 
+@registry.add('negamax')
 class NegamaxEngine(GreedyEngine):
     FORMAT_STAT = (
         'score: {score} [time: {time:0.3f}s, pv: {pv}]\n' +
@@ -21,7 +23,7 @@ class NegamaxEngine(GreedyEngine):
         pv, score = self.search(board, self._maxdepth)
 
         self.showstats(pv, score)
-        
+
         return pv[0]
 
     def initcnt(self):
@@ -49,9 +51,9 @@ class NegamaxEngine(GreedyEngine):
         ctx['nps'] = nps
         ctx['score'] = score
         ctx['time'] = t
-        
+
         print(self.FORMAT_STAT.format(**ctx))
-    
+
     def search(self, board, depth, ply=1):
         self.inc('nodes')
 

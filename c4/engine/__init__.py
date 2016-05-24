@@ -7,7 +7,7 @@ from c4.engine.alphabeta import AlphaBetaEngine, ABCachedEngine, ABDeepEngine
 from c4.engine.pvs import (
     PVSEngine, PVSCachedEngine, PVSDeepEngine, PVSBookEngine
 )
-from c4.engine.simplenn import SimpleNNEngine
+from c4.engine.keras import GreedyKerasEngine
 
 
 __all__ = [
@@ -24,5 +24,5 @@ __all__ = [
     'PVSCachedEngine',
     'PVSDeepEngine',
     'PVSBookEngine',
-    'SimpleNNEngine',
+    'GreedyKerasEngine',
 ]

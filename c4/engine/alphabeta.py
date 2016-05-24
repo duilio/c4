@@ -3,8 +3,10 @@ from c4.engine.negamax import NegamaxEngine
 from c4.moveorder import MoveOrder
 from c4.engine.cached import CachedEngineMixin
 from c4.engine.deepening import IterativeDeepeningEngineMixin
+from c4.engine.registry import registry
 
 
+@registry.add('alphabeta')
 class AlphaBetaEngine(NegamaxEngine):
     FORMAT_STAT = (
         'score: {score} [time: {time:0.3f}s, pv: {pv}]\n' +
@@ -52,6 +54,7 @@ class AlphaBetaEngine(NegamaxEngine):
         return 'AlphaBeta(%s)' % self._maxdepth
 
 
+@registry.add('abcached')
 class ABCachedEngine(CachedEngineMixin, AlphaBetaEngine):
     FORMAT_STAT = (
         'score: {score} [time: {time:0.3f}s, pv: {pv}]\n' +
@@ -67,6 +70,7 @@ class ABCachedEngine(CachedEngineMixin, AlphaBetaEngine):
         return 'ABCache(%s)' % self._maxdepth
 
 
+@registry.add('abdeep')
 class ABDeepEngine(CachedEngineMixin, IterativeDeepeningEngineMixin,
                    AlphaBetaEngine):
     FORMAT_STAT = (

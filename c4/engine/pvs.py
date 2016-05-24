@@ -3,8 +3,10 @@ from c4.engine.alphabeta import AlphaBetaEngine
 from c4.engine.cached import CachedEngineMixin
 from c4.engine.deepening import IterativeDeepeningEngineMixin
 from c4.engine.book import BookEngineMixin
+from c4.engine.registry import registry
 
 
+@registry.add('pvs')
 class PVSEngine(AlphaBetaEngine):
     def search(self, board, depth, ply=1, alpha=-INF, beta=INF, hint=None):
         self.inc('nodes')
@@ -51,6 +53,7 @@ class PVSEngine(AlphaBetaEngine):
         return 'PVS(%s)' % self._maxdepth
 
 
+@registry.add('pvscached')
 class PVSCachedEngine(CachedEngineMixin, PVSEngine):
     FORMAT_STAT = (
         'score: {score} [time: {time:0.3f}s, pv: {pv}]\n' +
@@ -66,6 +69,7 @@ class PVSCachedEngine(CachedEngineMixin, PVSEngine):
         return 'PVSCache(%s)' % self._maxdepth
 
 
+@registry.add('pvsdeep')
 class PVSDeepEngine(CachedEngineMixin, IterativeDeepeningEngineMixin,
                     PVSEngine):
     FORMAT_STAT = (
@@ -82,6 +86,7 @@ class PVSDeepEngine(CachedEngineMixin, IterativeDeepeningEngineMixin,
         return 'PVSDeep(%s)' % self._maxdepth
 
 
+@registry.add('pvsbook')
 class PVSBookEngine(BookEngineMixin, PVSDeepEngine):
     def __str__(self):
         return 'PVSBook(%s)' % self._maxdepth

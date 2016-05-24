@@ -5,8 +5,10 @@ from collections import defaultdict
 from c4.evaluate import DRAW
 from c4.engine.base import Engine
 from c4.engine.greedy import WeightedGreedyEngine
+from c4.engine.registry import registry
 
 
+@registry.add('mcts')
 class MonteCarloTreeSearch(Engine):
     def __init__(self, simulations=1000, C=1/math.sqrt(2)):
         super(MonteCarloTreeSearch, self).__init__()

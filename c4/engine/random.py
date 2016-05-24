@@ -2,8 +2,10 @@ import random
 
 from c4.evaluate import Evaluator
 from c4.engine.base import Engine
+from c4.engine.registry import registry
 
 
+@registry.add('random')
 class RandomEngine(Engine):
     def __init__(self):
         self._evaluator = Evaluator()

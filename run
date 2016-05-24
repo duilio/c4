@@ -7,33 +7,10 @@ import yaml
 import numpy as np
 
 from c4.board import Board, DRAW
-from c4.engine import (
-    GreedyEngine, WeightedGreedyEngine, RandomEngine,
-    MonteCarloTreeSearch,
-    NegamaxEngine, AlphaBetaEngine, ABCachedEngine, ABDeepEngine,
-    PVSEngine, PVSCachedEngine, PVSDeepEngine, PVSBookEngine,
-    SimpleNNEngine,
-)
-from c4.engine.human import HumanEngine
-from c4.game import GameHandler
 from c4.arena import arena
-
-
-engine_map = {
-    'greedy': GreedyEngine,
-    'weighted': WeightedGreedyEngine,
-    'mcts': MonteCarloTreeSearch,
-    'random': RandomEngine,
-    'negamax': NegamaxEngine,
-    'alphabeta': AlphaBetaEngine,
-    'abcached': ABCachedEngine,
-    'abdeep': ABDeepEngine,
-    'pvs': PVSEngine,
-    'pvscached': PVSCachedEngine,
-    'pvsdeep': PVSDeepEngine,
-    'pvsbook': PVSBookEngine,
-    'simplenn': SimpleNNEngine,
-    }
+from c4.game import GameHandler
+from c4.engine.human import HumanEngine
+from c4.engine.registry import registry as engine_registry
 
 
 def main():
@@ -78,8 +55,8 @@ def main():
 
 
 def run_game(args):
-    engine_name, *engine_args = args.engine.split(':')
-    engine_class = engine_map[engine_name]
+    engine_class_name, *engine_args = args.engine.split(':')
+    engine_class = engine_registry.get_class(engine_class_name)
     engine = engine_class(*engine_args)
 
     name = input('Your name: ')
@@ -104,16 +81,16 @@ def run_arena(args):
     engines = []
     subscribed_engines = set()
     for i, engine_cfg in enumerate(config):
-        engine_class = engine_map[engine_cfg.pop('class')]
         engine_name = engine_cfg.pop('name', None)
-        engine = engine_class(**engine_cfg)
+        engine = engine_registry.get(engine_cfg)
+
         if engine_name is None:
             engine_name = str(engine)
         if engine_name not in subscribed_engines:
             subscribed_engines.add(engine_name)
         else:
             print('Error: engine name %s collides, '
-                  'use "name" attribute to make it unique' % engine_name,
+                  'use "name" attribute to make it unique.' % engine_name,
                   file=sys.stderr)
             sys.exit(1)
 
@@ -123,8 +100,8 @@ def run_arena(args):
 
 
 def run_bm(args):
-    engine_name, *engine_args = args.engine.split(':')
-    engine_class = engine_map[engine_name]
+    engine_class_name, *engine_args = args.engine.split(':')
+    engine_class = engine_registry.get_class(engine_class_name)
     engine = engine_class(*engine_args)
     move = engine.choose(Board())
     print('Move: %d' % (move + 1))
