@@ -5,12 +5,13 @@ import numpy as np
 from keras.models import model_from_yaml
 
 from c4.engine.base import Engine
-from c4.engine.registry import registry
+from c4.engine.registry import registry as engine_registry
+from c4.processors import registry as processor_registry
 
 
-@registry.add('greedykeras')
+@engine_registry.add('greedykeras')
 class GreedyKerasEngine(Engine):
-    DEFAULT_PROCESSOR_CONFIG = {'class': 'simple_processor'}
+    DEFAULT_PROCESSOR_CONFIG = {'class': 'sides'}
 
     def __init__(self, model_path):
         arch_filename = os.path.join(model_path, 'arch.yml')
@@ -20,19 +21,19 @@ class GreedyKerasEngine(Engine):
             processor_config = model_arch.pop(
                 'processor',
                 self.DEFAULT_PROCESSOR_CONFIG)
+            processor = processor_registry.get(processor_config)
             model = model_from_yaml(yaml.dump(model_arch))
         model.load_weights(weights_filename)
         model.compile(loss='categorical_crossentropy',
                       optimizer='adam',
                       metrics=['accuracy'])
+
+        self._processor = processor
         self._model = model
 
     def choose(self, board):
-        X = np.array(
-            [x == board.stm for x in board._pos.flat] +
-            [x == board.other for x in board._pos.flat],
-            dtype=np.uint8
-        ).reshape((1, 2, 7, 6))
+        X = self._processor.process(board).reshape(
+            (1,) + self._processor.get_shape())
 
         pred = np.squeeze(self._model.predict(X))
         print('Predictions: %s' % pred)
@@ -45,4 +46,4 @@ class GreedyKerasEngine(Engine):
         assert False
 
     def __str__(self):
-        return 'SimpleNN'
+        return 'GreedyKeras'

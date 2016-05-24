@@ -36,6 +36,10 @@ class Board(object):
     def other(self):
         return PLAYER1 if self._stm != PLAYER1 else PLAYER2
 
+    @property
+    def rawdata(self):
+        return self._pos
+
     @classmethod
     def _check_end(cls, pos):
         for seg in cls.segments(pos):
