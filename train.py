@@ -4,10 +4,16 @@ import random
 
 from argparse import ArgumentParser
 
+import yaml
 import numpy as np
+
 from keras.utils import np_utils
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation, Flatten
+
+from c4.board import Board
+from c4.processors import registry
+
 
 
 def run():
@@ -29,11 +35,18 @@ def run():
                         default=None, help='Save the model in that path')
     parser.add_argument('-f', '--force', action='store_true', default=False,
                         help='Override output if already exists')
+    parser.add_argument('-p', '--processor', default='sides',
+                        help='Processor to use for model input generation.')
     args = parser.parse_args()
 
+    # initialize seed for reproducibility
     if args.seed is not None:
         np.random.seed(args.seed)
         random.seed(args.seed)
+
+    # create model input processor
+    processor_config = {'class': args.processor}
+    processor = registry.get(processor_config)
 
     input_data = []
     seen = set()
@@ -46,7 +59,10 @@ def run():
                     continue
 
                 serialized_board, move, score = line.split()[:3]
-                processed_board = preprocess_board(serialized_board)
+
+                board = Board.loads(serialized_board)
+                processed_board = processor.process(board)
+
                 move = int(move)
                 if score == '1':
                     score = 1
@@ -78,10 +94,10 @@ def run():
 
     print('Compiling model...')
     model = Sequential()
-    model.add(Flatten(input_shape=(2, 7, 6)))
-    model.add(Dense(69, input_dim=2*7*6))
+    model.add(Flatten(input_shape=processor.get_shape()))
+    model.add(Dense(69))
     model.add(Activation('relu'))
-    model.add(Dense(42, input_dim=2*7*6))
+    model.add(Dense(42))
     model.add(Activation('relu'))
     model.add(Dense(7))
     model.add(Activation('softmax'))
@@ -106,21 +122,11 @@ def run():
         weights_filename = os.path.join(args.output, 'weights.h5')
 
         with open(arch_filename, 'w') as fout:
-            fout.write(model.to_yaml())
+            arch = yaml.load(model.to_yaml())
+            arch['processor'] = processor_config
+            yaml.dump(arch, stream=fout)
+
         model.save_weights(weights_filename, overwrite=True)
-
-
-def preprocess_board(serialized_board):
-    stm = serialized_board[-1]
-    if stm == '1':
-        other = '2'
-    else:
-        other = '1'
-
-    return np.array(
-        [x == stm for x in serialized_board[:-1]] +
-        [x == other for x in serialized_board[:-1]],
-        dtype=float).reshape(2, 7, 6)
 
 
 if __name__ == '__main__':
