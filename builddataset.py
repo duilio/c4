@@ -11,6 +11,8 @@ from c4.engine import PVSBookEngine
 
 
 def iter_files(path):
+    """Iterate all game files in a path"""
+
     for root, dirs, files in os.walk(path):
         for f in files:
             if f.endswith('.game'):
@@ -20,9 +22,14 @@ def iter_files(path):
 def run():
     parser = ArgumentParser()
     parser.add_argument('paths', metavar='DIRECTORY', nargs='+')
-    parser.add_argument('-s', '--seed', type=int, default=None)
-    parser.add_argument('-d', '--max-depth', type=int, default=10)
-    parser.add_argument('-o', '--output', default=None)
+    parser.add_argument('-s', '--seed', type=int, default=None,
+                        help='Seed for random number generator.')
+    parser.add_argument('-d', '--max-depth', type=int, default=10,
+                        help='Maximum depth of the minimax derivative')
+    parser.add_argument('-l', '--limit-moves', type=int, default=None,
+                        help='Limit the number of moves to make')
+    parser.add_argument('-o', '--output', default=None,
+                        help='Output file (default: stdout)')
     args = parser.parse_args()
 
     engine = PVSBookEngine(maxdepth=args.max_depth, ordering='diff')
@@ -44,13 +51,13 @@ def run():
                     i/len(gamefiles) * 100),
                 file=sys.stderr
             )
-            process(engine, filename, fout)
+            process(engine, filename, args.limit_moves, fout)
             fout.flush()
     finally:
         fout.close()
 
 
-def process(engine, filename, fout):
+def process(engine, filename, limit, fout):
     with open(filename, 'r') as fin:
         moves = [int(x.strip()) for x in fin.readlines() if x.strip()]
         board = Board()
@@ -58,12 +65,12 @@ def process(engine, filename, fout):
             board = board.move(m)
         assert board.end is None
 
-        move, score = evaluate(engine, board)
+        move, score = evaluate(engine, board, limit)
         print('\t'.join([board.dumps(), str(move), str(score)]),
               file=fout)
 
 
-def evaluate(engine, root):
+def evaluate(engine, root, limit):
     moves = []
     node = root
     while node.end is None:
@@ -71,12 +78,20 @@ def evaluate(engine, root):
         moves.append(m)
         node = node.move(m)
 
+        # truncate the game if required
+        if limit is not None:
+            limit -= 1
+            if limit == 0:
+                break
+
     if node.end == root.stm:
-        score = 1
+        score = '1'
     elif node.end == DRAW:
-        score = 0
+        score = '0'
+    elif node.end is None:
+        score = '-'
     else:
-        score = -1
+        score = '-1'
 
     engine.reset()
     return moves[0], score
