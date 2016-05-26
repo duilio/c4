@@ -1,6 +1,6 @@
 class Engine(object):
     def choose(self, board):
-        raise NotImplemented
+        raise NotImplemented()
 
     def reset(self):
         pass
