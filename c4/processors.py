@@ -60,3 +60,25 @@ class SidesAndMovesProcessor(object):
                       pos == board.other,
                       available_moves)),
             dtype=np.uint8)
+
+
+@registry.add('sidesandmoves2')
+class SidesAndMovesProcessor2(SidesAndMovesProcessor):
+    """Like SidesAndMovesProcessor but add also two layers with zeros and ones
+
+    """
+    def __init__(self):
+        super(SidesAndMovesProcessor2, self).__init__()
+        self.zeros = np.zeros((1, 7, 6), dtype=np.uint8)
+        self.ones = np.ones((1, 7, 6), dtype=np.uint8)
+
+    def get_shape(self):
+        return (5, 7, 6)
+
+    def process(self, board):
+        sidesandmoves = super(SidesAndMovesProcessor2, self).process(board)
+        return np.concatenate((
+            self.zeros,
+            sidesandmoves,
+            self.ones,
+        ))
