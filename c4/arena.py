@@ -1,19 +1,42 @@
 import os
+import time
+import functools
 from itertools import permutations
 
 from c4.game import GameHandler
 
 
 class Stat(object):
-    __slots__ = ['win', 'loose', 'draws', 'win_X', 'win_O', 'score']
-
-    def __init__(self):
+    def __init__(self, engine):
         self.win = 0
         self.loose = 0
         self.draws = 0
         self.win_X = 0
         self.win_O = 0
         self.score = 0
+        self.moves = 0
+        self.time_spent = 0
+        self._wraps(engine)
+
+    def _wraps(self, engine):
+        """Wraps engine methods in order to track more insights"""
+
+        # engine.choose is wrapped to track time spent for each move
+        choose = engine.choose
+
+        def wrapper(board):
+            clock_start = time.clock()
+
+            r = choose(board)
+
+            # update stats
+            self.time_spent += time.clock() - clock_start
+            self.moves += 1
+
+            return r
+
+        functools.update_wrapper(wrapper, choose)
+        engine.choose = wrapper
 
 
 def arena(engines, rounds=1, dump_root=None):
@@ -26,7 +49,7 @@ def arena(engines, rounds=1, dump_root=None):
 
     stats = {}
     for name, e in engines:
-        stats[name] = Stat()
+        stats[name] = Stat(e)
 
     game_id = 0
     for round_id in range(rounds):
@@ -70,8 +93,9 @@ def arena(engines, rounds=1, dump_root=None):
             stats[looser_name].loose += 1
 
     rank = sorted(stats.items(), key=lambda x: x[1].score, reverse=True)
-    formats = '%-3s  | %-16s | %5s | %4s | %4s | %4s'
-    print(formats % ('N.', 'Name', 'Score', 'Win', 'WinX', 'WinO'))
+    formats = '%-3s  | %-16s | %5s | %4s | %4s | %4s | %13s'
+    print(formats % ('N.', 'Name', 'Score', 'Win', 'WinX', 'WinO',
+                     'Time per Move'))
     for i, (name, stat) in enumerate(rank, 1):
-        print(formats % (i, name, stat.score, stat.win, stat.win_X,
-                         stat.win_O))
+        print(formats % (i, name, stat.score, stat.win, stat.win_X, stat.win_O,
+                         '%0.3fms' % (stat.time_spent/stat.moves * 1000)))
