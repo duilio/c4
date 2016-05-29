@@ -2,7 +2,10 @@ import math
 import random
 from collections import defaultdict
 
+import numpy as np
+
 from c4.evaluate import DRAW
+from c4.evaldiff import evaldiff, INF
 from c4.engine.base import Engine
 from c4.engine.greedy import WeightedGreedyEngine
 from c4.engine.registry import registry
@@ -16,6 +19,7 @@ class MonteCarloTreeSearch(Engine):
         self.C = float(C)
         self.simulation_engine = WeightedGreedyEngine(False)
         self._stats = defaultdict(lambda: [0, 0])
+        self._priors = {}
 
     def choose(self, board):
         stats, depth = self.search(board, self.simulations, self.C)
@@ -79,23 +83,53 @@ class MonteCarloTreeSearch(Engine):
 
         bestscore = None
         bestmove = None
+        bestmove_n = 0
 
-        children = [(m, stats[board.move(m).hashkey()[0]])
+        priors = self.get_priors(board)
+
+        children = [(m, stats[board.move(m).hashkey()[0]], priors[m])
                     for m in board.moves()]
-        total_n = sum(x[0] for (_, x) in children)
+        total_n = sum(x[1][0] for x in children)
 
-        for child_move, child_stat in children:
+        for child_move, child_stat, prior in children:
             n, w = child_stat
+
             if n == 0:
-                return child_move, False
+                Q = 0
             else:
-                score = (w / n) + C * math.sqrt(2 * math.log(total_n) / n)
-                if bestscore is None or score > bestscore:
-                    bestscore = score
-                    bestmove = child_move
+                Q = w / n
+
+            score = Q + C * prior * math.sqrt(total_n) / (1 + n)
+
+            if bestscore is None or score > bestscore:
+                bestscore = score
+                bestmove = child_move
+                bestmove_n = n
 
         assert bestmove is not None
-        return bestmove, True
+        return bestmove, bestmove_n > 0
+
+    def get_priors(self, board):
+        """Returns prior probability for each move of the given board"""
+
+        priors = self._priors.get(board.hashkey(), None)
+        if priors is not None:
+            return priors
+
+        moves = board.moves()
+        scores = [evaldiff(board, m) for m in moves]
+        if max(scores) >= INF - 1:
+            priors = {m: 0 for m in moves}
+            m = max(zip(scores, moves))[1]
+            priors[m] = 1.0
+            return priors
+
+        weights = np.array(scores, dtype=float) + 1.0
+        if weights.sum() == 0:
+            weights = np.ones(len(moves), dtype=float) / len(moves)
+        else:
+            weights /= weights.sum()
+        return {m: w for m, w in zip(moves, weights)}
 
     def select_best_move(self, stats, depth, board):
         """Select the best move at the end of the Monte Carlo tree search"""
@@ -108,7 +142,8 @@ class MonteCarloTreeSearch(Engine):
         for m in moves:
             n, w = stats[board.move(m).hashkey()[0]]
             total_n += n
-            print('Move %d score: %d/%d (%0.1f%%)' % (m+1, w, n, w/n*100))
+            print('Move %d score: %d/%d (%0.1f%%)' % (m+1, w, n, w/n*100
+                                                      if n != 0 else 0))
             if n > bestscore or (n == bestscore and random.random() <= 0.5):
                 bestmove = m
                 bestscore = n
