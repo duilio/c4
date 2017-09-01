@@ -9,7 +9,9 @@ import numpy as np
 
 from keras.utils import np_utils
 from keras.models import Sequential
-from keras.layers.core import Dense, Activation, Flatten
+from keras.layers.core import Dense, Activation, Flatten, Dropout
+from keras.layers.convolutional import Convolution2D, MaxPooling2D
+
 
 from c4.board import Board
 from c4.processors import registry
@@ -48,66 +50,70 @@ def run():
     processor_config = {'class': args.processor}
     processor = registry.get(processor_config)
 
-    input_data = []
-    seen = set()
     dups = 0
-    for i, filename in enumerate(args.files, 1):
-        print('Reading file %s... (%d/%d)' % (filename, i, len(args.files)))
-        with open(filename, 'r') as fin:
-            for line in fin:
-                if not line.strip() or line.startswith('#'):
-                    continue
+    rows = 0
 
-                serialized_board, move, score = line.split()[:3]
+    train_datasets = []
+    batches = split_batches(args.files)
 
-                board = Board.loads(serialized_board)
-                processed_board = processor.process(board)
+    for i, files in enumerate(batches, 1):
+        print('Loading batch %d/%d' % (i, len(batches)))
 
-                move = int(move)
-                if score == '1':
-                    score = 1
-                elif score == '-1':
-                    score = 0
-                elif score == '0':
-                    score = 0.5
-                else:
-                    score = None
+        input_data, batch_dups, batch_rows = load_train_data(files,
+                                                             processor,
+                                                             args.unique)
+        dups += batch_dups
+        rows += batch_rows
 
-                key = (serialized_board, move, score)
-                if args.unique and key in seen:
-                    dups += 1
-                    continue
-                seen.add(key)
+        X = np.array([x[0] for x in input_data], dtype=np.uint8)
+        y = np.array([x[1] for x in input_data], dtype=np.uint8)
+        Y = np_utils.to_categorical(y, 7)
 
-                input_data.append((processed_board, move, score))
+        train_datasets.append((X, Y))
 
     if args.unique:
-        print('Found %d over %d duplicates' % (dups, dups + len(seen)))
-
-    random.shuffle(input_data)
-
-    print('Preparing data...')
-    X = np.array([x[0] for x in input_data],
-                 dtype=np.uint8)
-    y = np.array([x[1] for x in input_data], dtype=np.uint8)
-    Y = np_utils.to_categorical(y, 7)
+        print('Found %d dups over %d rows' % (dups, rows))
 
     print('Compiling model...')
     model = Sequential()
-    model.add(Flatten(input_shape=processor.get_shape()))
-    model.add(Dense(69))
-    model.add(Activation('relu'))
-    model.add(Dense(42))
-    model.add(Activation('relu'))
-    model.add(Dense(7))
-    model.add(Activation('softmax'))
+    if 0:
+        model.add(Flatten(input_shape=processor.get_shape()))
+        model.add(Dense(128))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.2))
+        model.add(Dense(69))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.2))
+        model.add(Dense(42))
+        model.add(Activation('relu'))
+        model.add(Dense(7))
+        model.add(Activation('softmax'))
+    else:
+        FILTERS = 36
+        CONV_KERNEL_SIZE = 4
+
+        model.add(Convolution2D(FILTERS, CONV_KERNEL_SIZE, CONV_KERNEL_SIZE,
+                                border_mode='valid',
+                                init='uniform',
+                                input_shape=processor.get_shape()))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.15))
+        model.add(Flatten())
+        model.add(Dense(100))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.15))
+        model.add(Dense(7))
+        model.add(Activation('softmax'))
+
     model.compile(loss='categorical_crossentropy',
-                  optimizer='adam',
+                  optimizer='adadelta',
                   metrics=['accuracy'])
 
     print('Training...')
-    model.fit(X, Y, batch_size=args.batch_size, nb_epoch=args.epoch, verbose=1,
-              validation_split=args.validation_split)
+    for X, Y in train_datasets:
+        model.fit(X, Y, batch_size=args.batch_size,
+                  nb_epoch=args.epoch, verbose=1,
+                  validation_split=args.validation_split)
 
     if args.output is not None:
         print('Saving...')
@@ -129,5 +135,65 @@ def run():
         model.save_weights(weights_filename, overwrite=True)
 
 
+def split_batches(files):
+    batches = []
+    current_batch = []
+
+    for f in files:
+        if f == ',':
+            batches.append(current_batch)
+            current_batch = []
+        else:
+            current_batch.append(f)
+
+    if current_batch:
+        batches.append(current_batch)
+
+    return batches
+
+
+def load_train_data(files, processor, unique):
+    dups = 0
+    rows = 0
+    seen = set()
+
+    input_data = []
+    for i, filename in enumerate(files, 1):
+        print('Reading file %s... (%d/%d)' % (filename, i, len(files)))
+        with open(filename, 'r') as fin:
+            for line in fin:
+                if not line.strip() or line.startswith('#'):
+                    continue
+
+                rows += 1
+
+                serialized_board, move, score = line.split()[:3]
+
+                board = Board.loads(serialized_board)
+                processed_board = processor.process(board)
+
+                move = int(move)
+                if score == '1':
+                    score = 1
+                elif score == '-1':
+                    score = 0
+                elif score == '0':
+                    score = 0.5
+                else:
+                    score = None
+
+                key = (serialized_board, move)
+                if unique and key in seen:
+                    dups += 1
+                    continue
+                seen.add(key)
+
+                input_data.append((processed_board, move, score))
+
+    random.shuffle(input_data)
+    return input_data, dups, rows
+
+
 if __name__ == '__main__':
     sys.exit(run())
+

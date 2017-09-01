@@ -25,7 +25,7 @@ class GreedyKerasEngine(Engine):
             model = model_from_yaml(yaml.dump(model_arch))
         model.load_weights(weights_filename)
         model.compile(loss='categorical_crossentropy',
-                      optimizer='adam',
+                      optimizer='adadelta',
                       metrics=['accuracy'])
 
         self._processor = processor

@@ -13,10 +13,11 @@ from c4.engine.registry import registry
 
 @registry.add('mcts')
 class MonteCarloTreeSearch(Engine):
-    def __init__(self, simulations=1000, C=1/math.sqrt(2)):
+    def __init__(self, simulations=1000, C=5.0, nthr=2):
         super(MonteCarloTreeSearch, self).__init__()
         self.simulations = int(simulations)
         self.C = float(C)
+        self.nthr = int(nthr)
         self.simulation_engine = WeightedGreedyEngine(False)
         self._stats = defaultdict(lambda: [0, 0])
         self._priors = {}
@@ -107,7 +108,7 @@ class MonteCarloTreeSearch(Engine):
                 bestmove_n = n
 
         assert bestmove is not None
-        return bestmove, bestmove_n > 0
+        return bestmove, bestmove_n >= self.nthr
 
     def get_priors(self, board):
         """Returns prior probability for each move of the given board"""
